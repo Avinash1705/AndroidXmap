@@ -67,30 +67,10 @@ nextPage.setOnClickListener(new View.OnClickListener() {
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         }
-//        @Override
-//        public boolean onCreateOptionsMenu(Menu menu) {
-//
-//            MenuInflater mi = getMenuInflater();
-//            mi.inflate(R.menu.bottom_menu, menu);
-//            return true;
-//        }
-
-//        @Override
-//        public boolean onOptionsItemSelected(MenuItem item) {
-//            switch (item.getItemId()){
-//                case R.id.hospital:
-//                    startActivity(new Intent(MapsActivity.this,DisplayActivity.class));
-//                    break;
-//            }
-//
-//
-//            return super.onOptionsItemSelected(item);
-//        }
 
 
         private void loadNearByPlaces()
-        {   //mMap.clear();
-            //  Intent i = getIntent();
+        {
             String type = "hospital";
 
             StringBuilder googlePlacesUrl =
@@ -134,11 +114,9 @@ nextPage.setOnClickListener(new View.OnClickListener() {
                         }
                     });
 
-
             requestQueue.add(jsonObjectRequest);
         }
 
-        // startActivity(new Intent(MapsActivity.this,DisplayActivity.class));
 
 
 

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto">
+
+<item android:id="@+id/hospital"
+    android:enabled="true"
+    android:title="Hospital"
+    android:onClick="Hospital"
+    android:icon="@drawable/ic_local_hospital_black_24dp"
+    app:showAsAction="ifRoom"/>
+<item android:id="@+id/restaurant"
+    android:enabled="true"
+    android:title="restaurent"
+    android:icon="@drawable/ic_restaurant_black_24dp"
+    app:showAsAction="ifRoom"/>
+<item android:id="@+id/school"
+    android:enabled="true"
+    android:title="School"
+    android:icon="@drawable/ic_home_black_24dp"
+    app:showAsAction="ifRoom"/>
+</menu>
+
