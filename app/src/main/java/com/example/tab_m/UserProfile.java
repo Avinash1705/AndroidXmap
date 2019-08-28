@@ -15,7 +15,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 public class UserProfile extends ListActivity {
-private ListView ll_userProfile;
 private TextView userPro;
 static   final String[] FRUITS = new String[] { "Avinash","8700056622","Bama","1234567890" };
 

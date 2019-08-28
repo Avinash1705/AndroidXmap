@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -19,72 +18,48 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseException;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthProvider;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.concurrent.TimeUnit;
 
 public class OptActivity extends AppCompatActivity {
-    private EditText otp,phoneNum;
-    private Button v_code,login;
-   private FirebaseAuth mAuth;
-   private String CodeSend, ph;
+    private FirebaseAuth mAuth;
+    private EditText otp,number,address,name;
+    private  Button getotp,sign;
+    private String motp,mnumber,VerificatinCode,m_address,m_name;
+    FirebaseDatabase database = FirebaseDatabase.getInstance();
+
+    PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks;
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        //  updateUI(currentUser);
+        if(currentUser !=null){
+            startActivity(new Intent(OptActivity.this,FirstPage.class));
+        }
+        else{
+            Toast.makeText(getApplicationContext(),"Register First",Toast.LENGTH_SHORT).show();
+        }
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_opt);
-            init();
-        mAuth=FirebaseAuth.getInstance();
+        setContentView(R.layout.activity_otp);
+        mAuth = FirebaseAuth.getInstance();
 
-        v_code.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-            SendVerification();
-            }
-        });
+        init();
+//            motp=otp.getText().toString();
+//            mnumber=number.getText().toString();
 
-        login.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                VerifySignIn();
-            }
-        });
-
-    }
-    private void VerifySignIn(){
-        String code=otp.getText().toString();
-
-        PhoneAuthCredential credential = PhoneAuthProvider.getCredential(CodeSend, code);
-        signInWithPhoneAuthCredential(credential);
-    }
-    private void signInWithPhoneAuthCredential(PhoneAuthCredential credential) {
-        mAuth.signInWithCredential(credential)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            Toast.makeText(getApplicationContext(),"Login Successfull", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(OptActivity.this,MapsActivity.class));
-
-
-                        } else {
-
-                            Toast.makeText(getApplicationContext(),"Login Failed",Toast.LENGTH_SHORT).show();
-
-                        }
-                    }
-                });
-    }
-
-
-
-    private void SendVerification() {
-        ph = phoneNum.getText().toString();
-
-        PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+        mCallbacks=new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
             @Override
             public void onVerificationCompleted(PhoneAuthCredential phoneAuthCredential) {
 
@@ -98,54 +73,67 @@ public class OptActivity extends AppCompatActivity {
             @Override
             public void onCodeSent(String s, PhoneAuthProvider.ForceResendingToken forceResendingToken) {
                 super.onCodeSent(s, forceResendingToken);
-
-                CodeSend = s;
+                VerificatinCode=s;
+                Toast.makeText(getApplicationContext(),"COde Send TO number",Toast.LENGTH_SHORT).show();
 
             }
         };
 
+    }
 
-        if (ph.isEmpty() || ph.length() < 10) {
-            phoneNum.setError("Phone Number is Req");
-            phoneNum.requestFocus();
-            return;
-        } else {
-
+    private void init(){
+        otp=findViewById(R.id.otp);number=findViewById(R.id.number);
+        getotp=findViewById(R.id.getotp);sign=findViewById(R.id.signin);
+        address=findViewById(R.id.address);
+        name=findViewById(R.id.name);
+    }
+    public void sendSms(View view){
+        mnumber="+91"+number.getText().toString();
+        if(mnumber!=null || m_name!=null || m_address!=null){
+           writeTodatabase();
             PhoneAuthProvider.getInstance().verifyPhoneNumber(
-                    ph,        // Phone number to verify
+                    mnumber,        // Phone number to verify
                     60,                 // Timeout duration
                     TimeUnit.SECONDS,   // Unit of timeout
                     this,               // Activity (for callback binding)
-                    mCallbacks);        // OnVerificationStateChangedCallbacksPhoneAuthActivity.java
+                    mCallbacks);        // OnVerificationStateChangedCallbacks
+        }
+        else{
+            Toast.makeText(getApplicationContext(),"Fill All Fields",Toast.LENGTH_SHORT).show();
         }
 
 
 
-
     }
-    private  void init(){
-    otp=findViewById(R.id.otp);
-    phoneNum=findViewById(R.id.PhoneNumber);
-    v_code=findViewById(R.id.getVerificationCode);
-    login=findViewById(R.id.login);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater mi = getMenuInflater();
-        mi.inflate(R.menu.login_menu, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
-            case R.id.login_menu:
+    public void SignInWithPhone(PhoneAuthCredential credential){
+        mAuth.signInWithCredential(credential).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                Toast.makeText(getApplicationContext(),"USer Success SignIN",Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(OptActivity.this,FirstPage.class));
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
+            }
+        });
+    }
+    public void Verify(View v){
+        String  input_code=otp.getText().toString();
+        verifyPhoneNumber(VerificatinCode,input_code);
+
+//        if(VerificatinCode.equals("")){
+//            }
+    }
+
+    private void verifyPhoneNumber(String verificatinCode, String input_code) {
+        PhoneAuthCredential credential=PhoneAuthProvider.getCredential(verificatinCode,input_code);
+        SignInWithPhone(credential);
+    }
+
+    private void writeTodatabase(){
+        m_address=address.getText().toString();
+        m_name=name.getText().toString();
+        DatabaseReference myRef = database.getReference("Registered User");
+        myRef.setValue(m_address);
+        myRef.setValue(m_name);
 
     }
+
 }
